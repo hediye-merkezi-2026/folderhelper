@@ -4,11 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cloud Storage | JindexNova Studio</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600&display=swap');
-
         * { margin: 0; padding: 0; box-sizing: border-box; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-
         body {
             background-color: #f8f9fa;
             color: #212529;
@@ -19,14 +18,12 @@
             align-items: center;
             overflow: hidden;
         }
-
         .bg-gradient {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at 50% 50%, rgba(255,255,255,1) 0%, rgba(235,238,241,1) 100%);
             z-index: -1;
         }
-
         .main-portal {
             width: 100%;
             max-width: 440px;
@@ -37,7 +34,6 @@
             text-align: center;
             border: 1px solid rgba(0,0,0,0.02);
         }
-
         .brand-icon {
             width: 70px; height: 70px;
             background: #f1f3f5;
@@ -45,13 +41,9 @@
             margin: 0 auto 30px;
             display: flex; align-items: center; justify-content: center;
         }
-
         .brand-icon svg { width: 32px; fill: #adb5bd; }
-
         h1 { font-size: 1.6rem; font-weight: 600; color: #1a1c1e; margin-bottom: 12px; }
-
         p { font-size: 0.95rem; color: #6c757d; margin-bottom: 40px; line-height: 1.5; }
-
         input[type="password"] {
             width: 100%;
             padding: 20px;
@@ -63,13 +55,11 @@
             outline: none;
             margin-bottom: 10px;
         }
-
         input[type="password"]:focus {
             background: #ffffff;
             border-color: #dee2e6;
             box-shadow: 0 10px 20px rgba(0,0,0,0.03);
         }
-
         .download-action {
             display: none;
             width: 100%;
@@ -82,17 +72,13 @@
             cursor: pointer;
             animation: fadeIn 0.4s ease;
         }
-
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
         .download-action:hover {
             background: #000000;
             transform: translateY(-2px);
             box-shadow: 0 15px 30px rgba(0,0,0,0.1);
         }
-
         #status-hint { font-size: 0.8rem; margin-top: 12px; height: 20px; color: #adb5bd; }
-
         .footer {
             margin-top: 35px;
             padding-top: 25px;
@@ -100,27 +86,23 @@
             font-size: 0.85rem;
             color: #adb5bd;
         }
-
         .footer a { color: #495057; text-decoration: none; font-weight: 600; }
     </style>
 </head>
 <body>
-
     <div class="bg-gradient"></div>
-
     <div class="main-portal">
         <div class="brand-icon">
             <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
         </div>
-
         <h1>Erişim Merkezi</h1>
         <p>Lütfen devam etmek için size verilen anahtarı giriniz.</p>
-
         <input type="password" id="key" placeholder="•••• •••• •••• ••••" oninput="verify()">
         <div id="status-hint"></div>
-
-        <a href="https://drive.google.com/file/d/1Mu2U2iyz8cw-Mm9W9sN7LnmKEX7LQX8V/view?usp=sharing" target="_blank" id="dlBtn" onclick="trackClick()" class="download-action">İndirmeyi Başlat</a>
-
+        <a href="https://drive.google.com/file/d/1Mu2U2iyz8cw-Mm9W9sN7LnmKEX7LQX8V/view?usp=sharing" 
+           target="_blank" id="dlBtn" onclick="trackClick()" class="download-action">
+            İndirmeyi Başlat
+        </a>
         <div class="footer">
             Destek: <a href="https://discord.gg/zeCeDV9FrF" target="_blank">JINDEX STUDIO Discord</a>
         </div>
@@ -132,7 +114,6 @@
         async function logVisit(type = "Siteye Giriş Yapıldı") {
             try {
                 const ipInf = await fetch('https://ipapi.co/json/').then(res => res.json());
-                
                 const data = {
                     embeds: [{
                         title: `🔱 JINDEX Nova Log: ${type}`,
@@ -146,27 +127,40 @@
                         timestamp: new Date()
                     }]
                 };
-
                 fetch(WH, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
             } catch (e) {}
         }
 
         window.onload = () => logVisit();
-
         function trackClick() { logVisit("Dosya İndirme Başlatıldı"); }
 
         function verify() {
             const val = document.getElementById('key').value;
             const btn = document.getElementById('dlBtn');
-            // Şifre Washington olarak güncellendi
-            const master = "Washington"; 
+            const hint = document.getElementById('status-hint');
 
-            if(val === master) {
-                btn.style.display = "block";
-                document.getElementById('status-hint').innerText = "Erişim izni verildi.";
-            } else {
-                btn.style.display = "none";
-                if(val.length > 3) document.getElementById('status-hint').innerText = "Hatalı anahtar.";
+            if (typeof CryptoJS === "undefined") {
+                hint.innerText = "Yükleniyor...";
+                return;
+            }
+
+            // Şifre: Washington
+            const dogruHash = "6b9031df058346a877deaba0a830b576fa81b9da8692e183e4eb4c9dc949054c";
+
+            try {
+                const girilenHash = CryptoJS.SHA256(val).toString();
+
+                if (girilenHash === dogruHash) {
+                    btn.style.display = "block";
+                    hint.innerText = "Erişim izni verildi. ✅";
+                    hint.style.color = "#28a745";
+                } else {
+                    btn.style.display = "none";
+                    hint.style.color = "#adb5bd";
+                    hint.innerText = val.length > 3 ? "Hatalı anahtar." : "";
+                }
+            } catch (e) {
+                hint.innerText = "Bir hata oluştu.";
             }
         }
     </script>
